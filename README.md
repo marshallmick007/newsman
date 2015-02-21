@@ -1,9 +1,9 @@
 # Newsman
 
-TODO: Write a gem description
+A simple RSS Feed Finder and Info Gatherer
 
 
-## Test Feeds
+## Test Parser Feeds
 
 ### ATOM
 - http://www.theregister.co.uk/security/headlines.atom
@@ -17,7 +17,7 @@ TODO: Write a gem description
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'newsman'
+gem 'newsman', :git => 'https://github.com/marshallmick007/newsman.git'
 ```
 
 And then execute:
@@ -30,11 +30,49 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Finding A Feed
+
+```ruby
+url = "https://gigaom.com/"
+hunter = Newsman::FeedHunter.new
+feeds = hunter.find_feeds url
+```
+
+`feeds` returns a hash of Feed Titles and URI's
+
+```ruby
+{
+             "Gigaom » Feed" => #<URI::HTTPS URL:https://gigaom.com/feed/>,
+    "Gigaom » Comments Feed" => #<URI::HTTPS URL:https://gigaom.com/comments/feed/>
+}
+```
+
+### Gathering Info About a Feed
+
+```ruby
+url = "http://www.theregister.co.uk/security/headlines.atom"
+parser = Newsman::RssParser.new
+info = parser.fetch url
+```
+
+Returns a `RssInfo` object containing the raw ruby `RSS` feed, the raw
+feed data, and limited parsed information available in the `to_h` method
+
+```ruby
+info.to_h
+{
+               :url => "http://www.theregister.co.uk/security/headlines.atom",
+             :title => "The Register - Security",
+        :item_count => 50,
+         :feed_type => :atom,
+    :published_date => 2015-02-21 17:15:18 UTC,
+             :error => nil
+}
+```
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/newsman/fork )
+1. Fork it ( https://github.com/marshallmick007/newsman/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
