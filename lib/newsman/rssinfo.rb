@@ -22,8 +22,8 @@ module Newsman
         :feed_type => @feed_type,
         :published_date => @published_date,
         :error => @error,
-        :posts_frequency => @post_frequency,
-        :item => @items
+        :post_frequency => @post_frequency,
+        :items => @items
       }
     end
   end
