@@ -3,7 +3,8 @@ module Newsman
   class RssInfo
     attr_accessor :url, :title, :item_count, :feed_type,
                   :raw, :rss, :fetched, :error,
-                  :published_date
+                  :published_date, :post_frequency,
+                  :items
 
     def initialize(url=nil)
       @url = url
@@ -20,7 +21,9 @@ module Newsman
         :item_count => @item_count,
         :feed_type => @feed_type,
         :published_date => @published_date,
-        :error => @error
+        :error => @error,
+        :posts_frequency => @post_frequency,
+        :item => @items
       }
     end
   end
