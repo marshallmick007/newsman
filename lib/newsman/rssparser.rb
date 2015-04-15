@@ -68,7 +68,7 @@ module Newsman
     end
 
     def get_post_date(entry, type)
-      date = nil
+      date = Time.now
       if type == :atom
         date = entry.updated.content
       else
@@ -96,10 +96,15 @@ module Newsman
     end
 
     def get_item_span_in_seconds(items)
+      return "Inf" if items[0].published_date.nil?
+      # TODO: Hacker News has no dates, so handle this better
       items[0].published_date - items[items.length-1].published_date
     end
 
     def get_post_frequency(items)
+      return "No Items to Count" if items.length == 0
+      return "Not a Serial RSS feed" if items[0].published_date.nil?
+
       span = get_item_span_in_seconds(items)
       period = "per day"
       if span < SECONDS_IN_DAY
