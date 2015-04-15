@@ -10,7 +10,10 @@ module Newsman
     def fetch(url)
       info = RssInfo.new url
       begin
-        open(url) do |f|
+        opts = {
+          "User-Agent" => "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0"
+        }
+        open(url, opts) do |f|
           info.raw = f.read
           info.rss = RSS::Parser.parse(info.raw, false)
         end
