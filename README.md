@@ -70,6 +70,12 @@ info.to_h
 }
 ```
 
+## Changelog
+
+0.1.5 - Added ability to fetch link[rel] only for types of
+`application/rss+xml` and `application/atom+xml` by passing a `strict`
+boolean into the `find_feeds` method
+
 ## Contributing
 
 1. Fork it ( https://github.com/marshallmick007/newsman/fork )

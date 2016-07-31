@@ -5,17 +5,19 @@ require 'sanitize'
 
 module Newsman
   class FeedHunter
-    def find_feeds(url)
+    def find_feeds(url, strict=false)
       feeds = {}
       begin
         i = 0
         page = Nokogiri::HTML( open( url, :allow_redirections => :safe ) );
         page.css("link[rel='alternate']").each do |f|
-          title = f['title'] || "Unknown (#{i})"
-          location = sanitize_url( url, f['href'] )
-          feeds[title] = location
+          if f['type'] =~ /application\/(rss|atom)\+xml/ || !strict
+            title = f['title'] || "Unknown (#{i})"
+            location = sanitize_url( url, f['href'] )
+            feeds[title] = location
 
-          i += 1 unless f['title']
+            i += 1 unless f['title']
+          end
         end
       rescue Exception => e
         feeds['error'] = "#{e}"
