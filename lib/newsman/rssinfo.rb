@@ -4,7 +4,7 @@ module Newsman
     attr_accessor :url, :title, :item_count, :feed_type,
                   :raw, :rss, :fetched, :error,
                   :published_date, :post_frequency,
-                  :items
+                  :items, :post_frequency_stats
 
     def initialize(url=nil)
       @url = url
@@ -23,6 +23,7 @@ module Newsman
         :published_date => @published_date,
         :error => @error,
         :post_frequency => @post_frequency,
+        :post_frequency_stats => @post_frequency_stats,
         :items => @items
       }
     end

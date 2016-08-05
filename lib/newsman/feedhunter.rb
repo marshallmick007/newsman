@@ -25,6 +25,11 @@ module Newsman
       return feeds
     end
 
+    def alternate_feed_locations(url)
+      # TODO: Find well-known alternate feed locations, such as
+      #       http://domain.tld/RSS
+    end
+
     def sanitize_url(baseUrl, href)
       scheme = URI.parse(baseUrl).scheme
       if starts_with_feed_scheme? href
