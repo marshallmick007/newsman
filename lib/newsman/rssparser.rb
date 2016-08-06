@@ -90,6 +90,11 @@ module Newsman
       else
         date = entry.date
       end
+      
+      if date.nil?
+        return Time.now.utc
+      end
+
       unless date.utc?
         date = date.getutc
       end
