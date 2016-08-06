@@ -82,11 +82,14 @@ module Newsman
     end
 
     def get_post_date(entry, type)
-      date = Time.now
+      date = Time.now.utc
       if type == :atom
         date = entry.updated.content
       else
         date = entry.date
+      end
+      unless date.utc?
+        date = date.getutc
       end
       return date
     end
