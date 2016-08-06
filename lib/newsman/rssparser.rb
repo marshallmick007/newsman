@@ -22,6 +22,7 @@ module Newsman
       info = RssInfo.new url
       begin
         opts = DEFAULT_READ_OPTS
+        opts = {:allow_redirections => :all}
         open(url, opts) do |f|
           info.raw = f.read
           info.rss = RSS::Parser.parse(info.raw, false)
@@ -70,9 +71,14 @@ module Newsman
 
     def get_items(items, type, options)
       posts = []
-      items_sorted( items, type ).each do |i|
+      hasNilDates = false
+      items.each do |i|
+      #items_sorted( items, type ).each do |i|
         post = RssPost.new
         post.published_date = get_post_date(i, type)
+        if post.published_date.nil? && hasNilDates == false
+          hasNilDates = true
+        end
         post.title = get_item_title(i, type)
         post.url = get_item_url(i, type)
         if options[:include_content]
@@ -80,6 +86,9 @@ module Newsman
         end
         posts << post
       end
+
+      posts.sort! { |a,b| b.published_date <=> a.published_date }
+
       return posts
     end
 
@@ -92,7 +101,8 @@ module Newsman
       end
       
       if date.nil?
-        return Time.now.utc
+        #return Time.now.utc
+        return nil
       end
 
       unless date.utc?
