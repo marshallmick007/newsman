@@ -1,5 +1,6 @@
 require 'rss'
 require 'open-uri'
+require 'open_uri_redirections'
 require 'sanitize'
 
 module Newsman
@@ -8,7 +9,8 @@ module Newsman
     SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR
 
     DEFAULT_READ_OPTS = {
-      "User-Agent" => "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0"
+      "User-Agent" => "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0",
+      :allow_redirections => :all
     }
 
     DEFAULT_OPTIONS = {
@@ -19,7 +21,7 @@ module Newsman
     def fetch(url, options=DEFAULT_OPTIONS)
       info = RssInfo.new url
       begin
-        opts = options[:read_options]
+        opts = DEFAULT_READ_OPTS
         open(url, opts) do |f|
           info.raw = f.read
           info.rss = RSS::Parser.parse(info.raw, false)
