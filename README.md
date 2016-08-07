@@ -72,6 +72,10 @@ info.to_h
 
 ## Changelog
 
+0.2.1 - Added ability to track when feeds contain all the same Publish
+Date. You can check `post_frequency_stats[:type]` for the value
+`:same_pub_date`
+
 0.1.5 - Added ability to fetch link[rel] only for types of
 `application/rss+xml` and `application/atom+xml` by passing a `strict`
 boolean into the `find_feeds` method

@@ -160,12 +160,21 @@ module Newsman
       stats = {
         :posts => 0.0,
         :period => :day,
-        :label => "No Items To Count"
+        :label => "No Items To Count",
+        :type => :standard
       }
       return stats if items.length == 0
       
       if items[0].published_date.nil? 
+        stats[:type] = :top
         stats[:label] = "Not a Serial RSS feed"
+        return stats
+      end
+
+      # for: http://feeds.uptodown.com/es/android 
+      if items[0].published_date == items[-1].published_date
+        stats[:label] = "All Feed Items Share Same PudDate"
+        stats[:type] = :same_pub_date
         return stats
       end
 
