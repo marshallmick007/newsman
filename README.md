@@ -72,6 +72,9 @@ info.to_h
 
 ## Changelog
 
+0.2.2 - Alias `:stats` for `:post_frequency_stats`, added tracking of
+the download size of a feed
+
 0.2.1 - Added ability to track when feeds contain all the same Publish
 Date. You can check `post_frequency_stats[:type]` for the value
 `:same_pub_date`

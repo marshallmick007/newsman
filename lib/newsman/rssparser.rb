@@ -20,10 +20,12 @@ module Newsman
 
     def fetch(url, options=DEFAULT_OPTIONS)
       info = RssInfo.new url
+      size = 0
       begin
         opts = DEFAULT_READ_OPTS
         opts = {:allow_redirections => :all}
         open(url, opts) do |f|
+          size = File.size(f)
           info.raw = f.read
           info.rss = RSS::Parser.parse(info.raw, false)
         end
@@ -31,10 +33,10 @@ module Newsman
         info.error = "While fetching #{url}: #{e} (#{e.class})"
       end
 
-      build_rss( info, options )
+      build_rss( info, size, options )
     end
 
-    def build_rss( info, options )
+    def build_rss( info, size, options )
       return info if info.has_error?
 
       info.feed_type = feed_type( info.rss )
@@ -44,6 +46,7 @@ module Newsman
       info.items = get_items( info.rss.items, info.feed_type, options )
       #info.post_frequency = get_post_frequency(info.items)
       set_post_frequency(info)
+      info.stats[:size] = size
       info.fetched = true
 
       return info
@@ -161,7 +164,8 @@ module Newsman
         :posts => 0.0,
         :period => :day,
         :label => "No Items To Count",
-        :type => :standard
+        :type => :standard,
+        :size => 0
       }
       return stats if items.length == 0
       

@@ -6,6 +6,8 @@ module Newsman
                   :published_date, :post_frequency,
                   :items, :post_frequency_stats
 
+    alias :stats :post_frequency_stats
+
     def initialize(url=nil)
       @url = url
     end
