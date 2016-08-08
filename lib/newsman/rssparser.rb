@@ -94,7 +94,6 @@ module Newsman
     def get_items(items, type, options)
       posts = []
       hasNilDates = false
-      puts items[0].inspect
       items.each do |i|
       #items_sorted( items, type ).each do |i|
         post = RssPost.new
