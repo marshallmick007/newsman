@@ -73,16 +73,18 @@ module Newsman
       if type == :rss
         return data.channel.title
       elsif type == :atom
-        return data.title.content
+        return data.title.content unless data.title.nil?
       end
+      "No Title Found"
     end
 
     def get_pubdate(data, type)
       if type == :rss
         return data.channel.lastBuildDate
       elsif type == :atom
-        return data.updated.content
+        return data.updated.content unless data.updated.nil?
       end
+      nil
     end
 
     def items_sorted(items, type)
@@ -92,6 +94,7 @@ module Newsman
     def get_items(items, type, options)
       posts = []
       hasNilDates = false
+      puts items[0].inspect
       items.each do |i|
       #items_sorted( items, type ).each do |i|
         post = RssPost.new
@@ -107,7 +110,7 @@ module Newsman
         posts << post
       end
 
-      posts.sort! { |a,b| b.published_date <=> a.published_date }
+      posts.sort! { |a,b| b.published_date <=> a.published_date } unless hasNilDates
 
       return posts
     end
@@ -115,7 +118,15 @@ module Newsman
     def get_post_date(entry, type)
       date = Time.now.utc
       if type == :atom
-        date = entry.updated.content
+        if entry.updated
+          date = entry.updated.content
+        #elsif entry.modified
+        #  date = entry.modified.content
+        #elsif entry.issued
+        #  date = entry.issued.content
+        else
+          date = nil
+        end
       else
         date = entry.date
       end
@@ -166,9 +177,10 @@ module Newsman
     end
 
     def get_item_span_in_seconds(items)
-      return "Inf" if items[0].published_date.nil?
+      return "Inf" if items[0].published_date.nil? && items[-1].published_date.nil?
       # TODO: Hacker News has no dates, so handle this better
-      items[0].published_date - items[items.length-1].published_date
+      last_pub_date = items[-1].published_date || items[-2].published_date
+      items[0].published_date - last_pub_date
     end
 
     def set_post_frequency(entry)
@@ -194,14 +206,17 @@ module Newsman
 
       # for: http://feeds.uptodown.com/es/android 
       if items[0].published_date == items[-1].published_date
-        stats[:label] = "All Feed Items Share Same PudDate"
+        stats[:label] = "All Feed Items Share Same PubDate"
         stats[:type] = :same_dates
         return stats
       end
 
       span = get_item_span_in_seconds(items)
       period = "per day"
-      if span < SECONDS_IN_DAY
+      if span == "Inf"
+        period = "Inf"
+        stats[:period] = :day
+      elsif span < SECONDS_IN_DAY
         measure = items.length / (span / SECONDS_IN_HOUR)
         period = "per hour"
         stats[:period] = :hour
