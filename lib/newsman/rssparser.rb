@@ -178,7 +178,7 @@ module Newsman
       # for: http://feeds.uptodown.com/es/android 
       if items[0].published_date == items[-1].published_date
         stats[:label] = "All Feed Items Share Same PudDate"
-        stats[:type] = :same_pub_date
+        stats[:type] = :same_dates
         return stats
       end
 
