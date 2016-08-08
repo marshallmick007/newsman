@@ -72,6 +72,8 @@ info.to_h
 
 ## Changelog
 
+0.2.4 - Parsing `content-length` HTTP header when available
+
 0.2.2 - Alias `:stats` for `:post_frequency_stats`, added tracking of
 the download size of a feed
 

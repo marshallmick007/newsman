@@ -25,8 +25,8 @@ module Newsman
         opts = DEFAULT_READ_OPTS
         opts = {:allow_redirections => :all}
         open(url, opts) do |f|
-          size = File.size(f)
           info.raw = f.read
+          size = try_get_size(f)
           info.rss = RSS::Parser.parse(info.raw, false)
         end
       rescue Exception => e
@@ -36,6 +36,19 @@ module Newsman
       build_rss( info, size, options )
     end
 
+    def try_get_size(file)
+      size = 0
+      begin
+        if file.meta && file.meta["content-length"]
+          size = file.meta["content-length"].to_i
+        else
+          size = File.size(file)
+        end
+      rescue StandardError => e
+      end
+      size
+    end
+    
     def build_rss( info, size, options )
       return info if info.has_error?
 
