@@ -72,6 +72,9 @@ info.to_h
 
 ## Changelog
 
+0.3.0 - Will now search for links in the body of the page that match
+wellknown providers like FeedBurner
+
 0.2.4 - Parsing `content-length` HTTP header when available
 
 0.2.2 - Alias `:stats` for `:post_frequency_stats`, added tracking of
