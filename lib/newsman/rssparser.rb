@@ -179,7 +179,11 @@ module Newsman
       return "Inf" if items[0].published_date.nil? && items[-1].published_date.nil?
       # TODO: Hacker News has no dates, so handle this better
       last_pub_date = items[-1].published_date || items[-2].published_date
-      items[0].published_date - last_pub_date
+      if last_pub_date
+        items[0].published_date - last_pub_date
+      else
+        "Inf"
+      end
     end
 
     def set_post_frequency(entry)
