@@ -192,6 +192,7 @@ module Newsman
     end
 
     def get_post_frequency(items)
+      measure = 0
       stats = {
         :posts => 0.0,
         :period => :day,
