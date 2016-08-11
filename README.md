@@ -72,6 +72,9 @@ info.to_h
 
 ## Changelog
 
+0.3.2 - Can find Feedly "Subscription" links by parsing
+`/http?:\/\/feedly.com\/i\/subscription\/feed\//`
+
 0.3.0 - Will now search for links in the body of the page that match
 wellknown providers like FeedBurner
 

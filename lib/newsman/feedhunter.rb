@@ -5,6 +5,9 @@ require 'sanitize'
 
 module Newsman
   class FeedHunter
+
+    FEEDLY_BASE_URL = /http?:\/\/feedly.com\/i\/subscription\/feed\//
+
     def find_feeds(url, strict=false)
       fhash = {}
       feeds = {}
@@ -52,7 +55,31 @@ module Newsman
         i += 1
         #feeds << { :title => title, :url => url }
       end
+      feedly = find_feedly_links(page, pageUrl)
+      fhash = feedly.merge(fhash)
       fhash #.keys.map { |k| { :title => fhash[k], :url => k } }
+    end
+
+    def find_feedly_links(page, pageUrl)
+      fhash = {}
+      i = 0
+
+      page.css("a").select { |a| a[:href] =~ FEEDLY_BASE_URL }.each do |link|
+        url = link[:href].gsub(FEEDLY_BASE_URL, '')
+        title = "Feedly Feed #{i}"
+        uri = URI.parse(url)
+        if uri.host
+          title = uri.host
+        end
+        if link[:title]
+          title = link[:title]
+        elsif link.content != nil && link.content.chomp.length > 0
+          title = link.content.chomp
+        end
+        fhash[uri] = title unless fhash[url]
+        i += 1
+      end
+      fhash
     end
 
     def alternate_feed_locations_for_url(url)
