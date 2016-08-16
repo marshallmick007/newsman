@@ -8,6 +8,7 @@ module Newsman
 
     FEEDLY_BASE_URL = /http?:\/\/feedly.com\/i\/subscription\/feed\//
 
+
     def find_feeds(url, strict=false)
       fhash = {}
       feeds = {}
@@ -37,7 +38,7 @@ module Newsman
 
     def parse_wellknown_feed_providers(page, pageUrl)
       fhash = {}
-      
+
       i = 0
       page.css("a").select { |a| a[:href] =~ /feedburner/ }.each do |link|
         url = link[:href]
@@ -56,7 +57,9 @@ module Newsman
         #feeds << { :title => title, :url => url }
       end
       feedly = find_feedly_links(page, pageUrl)
+      alts = alternate_feed_locations_for_url(page, pageUrl)
       fhash = feedly.merge(fhash)
+      fhash = alts.merge(fhash)
       fhash #.keys.map { |k| { :title => fhash[k], :url => k } }
     end
 
@@ -82,9 +85,29 @@ module Newsman
       fhash
     end
 
-    def alternate_feed_locations_for_url(url)
+    def alternate_feed_locations_for_url(page, url)
+      fhash = {}
       # TODO: Find well-known alternate feed locations, such as
       #       http://domain.tld/RSS
+      # TODO: Need to make this regex so it can grab urls that have the
+      #       full domain in front as well. currenrly only pulls relative paths
+      i = 0
+      page.css("a").select { |a| a[:href] =~ /^\/(feed|rss)/ }.each do |link|
+        url = url + link[:href]
+        title = "Body Link #{i}"
+        uri = URI.parse(url)
+        if uri.host
+          title = uri.host
+        end
+        if link[:title]
+          title = link[:title]
+        elsif link.content != nil && link.content.chomp.length > 0
+          title = link.content.chomp
+        end
+        fhash[uri] = title unless fhash[url]
+        i += 1
+      end
+      fhash
     end
 
     def sanitize_url(baseUrl, href)
@@ -98,6 +121,9 @@ module Newsman
     def starts_with_feed_scheme?(href)
       /^(feed:\/\/).*$/ =~ href
     end
+  
+    alias_method :find, :find_feeds
+  
   end
 end
 
