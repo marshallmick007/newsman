@@ -72,6 +72,8 @@ info.to_h
 
 ## Changelog
 
+0.3.6 - Can parse `dc_date` from feeds now (`http://alistapart.com/main/feed`)
+
 0.3.5 - `feed.title` is now null if it is not located in the RSS/ATOM
 source
 

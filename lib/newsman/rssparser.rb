@@ -129,7 +129,12 @@ module Newsman
       else
         date = entry.date
       end
-      
+
+      # DublinCore date
+      if date.nil? && entry.dc_date
+        date = entry.dc_date
+      end
+
       if date.nil?
         #return Time.now.utc
         return nil
