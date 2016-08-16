@@ -75,7 +75,7 @@ module Newsman
       elsif type == :atom
         return data.title.content unless data.title.nil?
       end
-      "No Title Found"
+      nil
     end
 
     def get_pubdate(data, type)

@@ -72,6 +72,9 @@ info.to_h
 
 ## Changelog
 
+0.3.5 - `feed.title` is now null if it is not located in the RSS/ATOM
+source
+
 0.3.2 - Can find Feedly "Subscription" links by parsing
 `/http?:\/\/feedly.com\/i\/subscription\/feed\//`
 
