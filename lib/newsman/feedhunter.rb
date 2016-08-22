@@ -30,8 +30,12 @@ module Newsman
         ffeeds.each do |k, v|
           feeds[v] = k
         end
+      rescue SocketError => se
+        feeds['error'] = "Try HTTPS or www? #{se}"
+        feeds['error_type'] = :connection
       rescue Exception => e
-        feeds['error'] = "#{e}"
+        feeds['error'] = "#{e} (#{e.class})"
+        feeds['error_type'] = :general
       end
       return feeds
     end
@@ -121,7 +125,19 @@ module Newsman
     def starts_with_feed_scheme?(href)
       /^(feed:\/\/).*$/ =~ href
     end
+
+    def is_http?(href)
+      /^(http:\/\/).*$/ =~ href
+    end
   
+    def is_https?(href)
+      /^(https:\/\/).*$/ =~ href
+    end
+   
+    def has_www?(href)
+      /^(https?:\/\/www).*$/ =~ href
+    end
+
     alias_method :find, :find_feeds
   
   end
