@@ -150,6 +150,8 @@ module Newsman
       content=nil
       if type == :atom
         content = entry.summary
+      elsif entry.respond_to?(:content_encoded)
+        content = entry.content_encoded
       else
         content = entry.description
       end
