@@ -3,10 +3,14 @@ require 'zlib'
 module Newsman
   class UrlNormalizer
     def normalize(url)
-      u = URI.parse(url)
-      return nil if u.host.nil?
+      begin
+        u = URI.parse(url)
+        return nil if u.host.nil?
 
-      canonicalize_host(u) + canonicalize_path(u) + canonicalize_query(u)
+        canonicalize_host(u) + canonicalize_path(u) + canonicalize_query(u)
+      rescue
+        nil
+      end
     end
 
     def crc32(str)
