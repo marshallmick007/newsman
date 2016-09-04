@@ -123,6 +123,7 @@ module Newsman
     end
 
     def get_normalized_links(content)
+      return [] if content.nil?
       URI.extract(content).map { |u| @url_normalizer.normalize(u) }.compact
     end
 
