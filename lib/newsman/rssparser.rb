@@ -15,8 +15,13 @@ module Newsman
 
     DEFAULT_OPTIONS = {
       :include_content => false,
+      :parse_links => false,
       :read_options => DEFAULT_READ_OPTS
     }
+
+    def initialize()
+      @url_normalizer = Newsman::UrlNormalizer.new
+    end
 
     def fetch(url, options=DEFAULT_OPTIONS)
       info = RssInfo.new url
@@ -25,9 +30,9 @@ module Newsman
         opts = DEFAULT_READ_OPTS
         opts = {:allow_redirections => :all}
         open(url, opts) do |f|
-          info.raw = f.read
+          raw = f.read
           size = try_get_size(f)
-          info.rss = RSS::Parser.parse(info.raw, false)
+          info.rss = RSS::Parser.parse(raw, false)
         end
       rescue Exception => e
         info.error = "While fetching #{url}: #{e} (#{e.class})"
@@ -106,12 +111,19 @@ module Newsman
         if options[:include_content]
           post.content = get_item_content(i, type)
         end
+        if options[:parse_links]
+          post.links = get_normalized_links(get_item_content(i, type))
+        end
         posts << post
       end
 
       posts.sort! { |a,b| b.published_date <=> a.published_date } unless hasNilDates
 
       return posts
+    end
+
+    def get_normalized_links(content)
+      URI.extract(content).map { |u| @url_normalizer.normalize(u) }.compact
     end
 
     def get_post_date(entry, type)

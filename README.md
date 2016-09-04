@@ -72,6 +72,9 @@ info.to_h
 
 ## Changelog
 
+0.4.0 - Can extract canonicalized links from feeds by passing option
+`:parse_links => true`
+
 0.3.8 - Can parse `content_encoded` from feeds (`http://www.swiss-miss.com/feed`)
 
 0.3.6 - Can parse `dc_date` from feeds now (`http://alistapart.com/main/feed`)

@@ -1,9 +1,10 @@
 module Newsman
   class RssPost
-    attr_accessor :url, :title, :published_date, :error, :content
+    attr_accessor :url, :title, :published_date, :error, :content, :links
 
     def initialize(url=nil)
       @url = url
+      @links = []
     end
 
     def has_error?
@@ -15,7 +16,8 @@ module Newsman
         :url => @url,
         :title => @title,
         :published_date => @published_date,
-        :error => @error
+        :error => @error,
+        :links => @links || []
       }
     end
   end
