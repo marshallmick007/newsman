@@ -10,7 +10,8 @@ module Newsman
 
     DEFAULT_READ_OPTS = {
       "User-Agent" => "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0",
-      :allow_redirections => :all
+      :allow_redirections => :all,
+      :open_timeout => 30
     }
 
     DEFAULT_OPTIONS = {
@@ -27,9 +28,9 @@ module Newsman
       info = RssInfo.new url
       size = 0
       begin
-        opts = DEFAULT_READ_OPTS
-        opts = {:allow_redirections => :all}
-        open(url, opts) do |f|
+        opts = DEFAULT_OPTIONS.merge(options)
+        open_opts = DEFAULT_READ_OPTS.merge(opts[:read_options])
+        open(url, open_opts) do |f|
           raw = f.read
           size = try_get_size(f)
           info.rss = RSS::Parser.parse(raw, false)
@@ -38,7 +39,7 @@ module Newsman
         info.error = "While fetching #{url}: #{e} (#{e.class})"
       end
 
-      build_rss( info, size, options )
+      build_rss( info, size, opts )
     end
 
     def try_get_size(file)
@@ -53,7 +54,7 @@ module Newsman
       end
       size
     end
-    
+
     def build_rss( info, size, options )
       return info if info.has_error?
 
@@ -221,14 +222,14 @@ module Newsman
         :size => 0
       }
       return stats if items.length == 0
-      
-      if items[0].published_date.nil? 
+
+      if items[0].published_date.nil?
         stats[:type] = :top
         stats[:label] = "Not a Serial RSS feed"
         return stats
       end
 
-      # for: http://feeds.uptodown.com/es/android 
+      # for: http://feeds.uptodown.com/es/android
       if items[0].published_date == items[-1].published_date
         stats[:label] = "All Feed Items Share Same PubDate"
         stats[:type] = :same_dates
