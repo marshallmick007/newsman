@@ -35,6 +35,8 @@ module Newsman
           size = try_get_size(f)
           info.rss = RSS::Parser.parse(raw, false)
         end
+      rescue OpenURI::HTTPError => he
+        info.error = he.message
       rescue Exception => e
         info.error = "While fetching #{url}: #{e} (#{e.class})"
       end
