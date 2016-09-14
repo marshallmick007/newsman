@@ -7,7 +7,7 @@ module Newsman
   class FeedHunter
 
     FEEDLY_BASE_URL = /http?:\/\/feedly.com\/i\/subscription\/feed\//
-
+    FEEDBLITZ_BASE = /http?:\/\/feeds\.feedblitz\.com\/(.*)/
 
     def find_feeds(url, strict=false)
       fhash = {}
@@ -37,7 +37,7 @@ module Newsman
         feeds['error'] = "#{e} (#{e.class})"
         feeds['error_type'] = :general
       end
-      return feeds
+      return normalize_feeds(feeds)
     end
 
     def parse_wellknown_feed_providers(page, pageUrl)
@@ -62,9 +62,48 @@ module Newsman
       end
       feedly = find_feedly_links(page, pageUrl)
       alts = alternate_feed_locations_for_url(page, pageUrl)
+      feedblitz = find_feedblitz_links(page, pageUrl)
       fhash = feedly.merge(fhash)
       fhash = alts.merge(fhash)
+      fhash = feedblitz.merge(fhash)
       fhash #.keys.map { |k| { :title => fhash[k], :url => k } }
+    end
+
+    def normalize_feeds(feeds)
+      retval = {}
+      feeds.each do |k,v|
+        if is_feedblitz_url?(v)
+          v.query = "x=1" unless v.query == "x=1"
+        end
+        retval[k] = v
+      end
+      retval
+    end
+
+    def is_feedblitz_url?(uri)
+      uri.to_s =~ FEEDBLITZ_BASE
+    end
+    
+    def find_feedblitz_links(page, pageUrl)
+      fhash = {}
+      i = 0
+
+      page.css("a").select { |a| a[:href] =~ FEEDBLITZ_BASE }.each do |link|
+        url = link[:href]
+        title = "FeedBlitz Feed #{i}"
+        uri = URI.parse(url)
+        if uri.host
+          title = uri.host
+        end
+        if link[:title]
+          title = link[:title]
+        elsif link.content != nil && link.content.chomp.length > 0
+          title = link.content.chomp
+        end
+        fhash[uri] = title unless fhash[url]
+        i += 1
+      end
+      fhash
     end
 
     def find_feedly_links(page, pageUrl)
