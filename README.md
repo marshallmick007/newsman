@@ -35,7 +35,13 @@ Or install it yourself as:
 ```ruby
 url = "https://gigaom.com/"
 hunter = Newsman::FeedHunter.new
-feeds = hunter.find_feeds url
+options = {
+          :strict_header_links => true,
+          :search_wellknown_locations => true,
+          :parse_body_links => false
+       }
+
+feeds = hunter.find_feeds url, options
 ```
 
 `feeds` returns a hash of Feed Titles and URI's
@@ -71,6 +77,9 @@ info.to_h
 ```
 
 ## Changelog
+
+0.5.3 - Support an options hash to `FeedHunter#find_feeds`. Additional
+well-known places are inspected
 
 0.5.1 - Basic support for finding feeds in well-known places
 

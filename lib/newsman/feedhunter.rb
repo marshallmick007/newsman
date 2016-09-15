@@ -31,7 +31,6 @@ module Newsman
       rescue Exception => e
         feeds['error'] = "#{e} (#{e.class})"
         feeds['error_type'] = :general
-        puts e.backtrace
       end
       return normalize_feeds(feeds)
     end
@@ -193,7 +192,9 @@ module Newsman
       uris << URI.parse( "#{scheme}://#{host}/feeds")
       uris << URI.parse( "#{scheme}://#{host}/rss")
       uris << URI.parse( "#{scheme}://#{host}/rssfeeds")
+      uris << URI.parse( "#{scheme}://#{host}/blog")
       uris << URI.parse( "#{scheme}://feeds.#{remove_www(host)}")
+      uris << URI.parse( "#{scheme}://blog.{remove_www(host)}")
       uris.each do |uri|
         ct = get_uri_content_type(uri)
         puts "checking [#{uri}] got #{ct}"
