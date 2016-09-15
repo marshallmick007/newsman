@@ -72,6 +72,8 @@ info.to_h
 
 ## Changelog
 
+0.5.1 - Basic support for finding feeds in well-known places
+
 0.5.0 - Can extract links for FeedBlitz
 
 0.4.0 - Can extract canonicalized links from feeds by passing option
