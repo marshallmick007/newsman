@@ -11,11 +11,17 @@ module Newsman
     RSS_CONTENT_TYPE = /application\/(rss|atom)\+xml/
     XML_CONTENT_TYPE = /text\/xml/
 
-    def find_feeds(url, strict=false)
+    DEFAULT_OPTIONS = {
+      :strict_header_links => true,
+      :search_wellknown_locations => true,
+      :parse_body_links => false
+    }
+
+    def find_feeds(url, options=DEFAULT_OPTIONS)
       fhash = {}
       feeds = {}
       begin
-        fhash = process_url(url, strict, false)
+        fhash = process_url(url, options)
         fhash.each do |k, v|
           feeds[v] = k
         end
@@ -30,12 +36,13 @@ module Newsman
       return normalize_feeds(feeds)
     end
 
-    def process_url(url, strict=false, parse_body_links=false)
+    def process_url(url, options)
       fhash = {}
+      options = DEFAULT_OPTIONS.merge(options)
       i = 0
       page = Nokogiri::HTML( open( url, :allow_redirections => :safe ) );
       page.css("link[rel='alternate']").each do |f|
-        if f['type'] =~ RSS_CONTENT_TYPE || !strict
+        if f['type'] =~ RSS_CONTENT_TYPE || !options[:strict_header_links]
           title = f['title'] || "Unknown (#{i})"
           location = sanitize_url( url, f['href'] )
           fhash[location] = title
@@ -44,11 +51,16 @@ module Newsman
         end
       end
       wkfeeds = parse_wellknown_feed_providers(page, url)
-      alt_feeds = try_alternate_feeds_for_uri(url) unless strict
-      body_links = parse_body_links(page, url) if parse_body_links
       fhash = wkfeeds.merge(fhash)
-      fhash = body_links.merge(fhash) if parse_body_links
-      fhash = alt_feeds.merge(fhash) unless strict
+      
+      if options[:search_wellknown_locations]
+        alt_feeds = try_alternate_feeds_for_uri(url) 
+        fhash = alt_feeds.merge(fhash)
+      end
+      if options[:parse_body_links]
+        body_links = parse_body_links(page, url)
+        fhash = body_links.merge(fhash)
+      end
       return fhash
     end
 
@@ -63,8 +75,8 @@ module Newsman
         end
         title = "Body Link #{i}"
         uri = URI.parse(url)
-
-        is_rss_ct = is_rss_content_type?( fetch_content_type_for_uri(uri, limit=10) )
+        puts "Following link #{uri}"
+        is_rss_ct = is_rss_content_type?( fetch_content_type_for_uri(uri) )
         if is_rss_ct
           if uri.host
             title = uri.host
@@ -168,7 +180,10 @@ module Newsman
       fhash
     end
 
-    def try_alternate_feeds_for_uri(uri)
+    def try_alternate_feeds_for_uri(uri, options=DEFAULT_OPTIONS)
+      options = DEFAULT_OPTIONS.merge(options)
+      options[:search_wellknown_locations] = false
+      
       fhash = {}
       uri = URI.parse(uri) unless uri.respond_to?(:host)
       host = uri.host
@@ -188,7 +203,7 @@ module Newsman
           # This might be an index file, so scan the html for links
           # that also could be feed links
           begin
-            page_links = parse_uri_for_feed_links(uri)
+            page_links = parse_uri_for_feed_links(uri, options)
             fhash = page_links.merge(fhash)
           rescue 
           end
@@ -206,8 +221,9 @@ module Newsman
       :none
     end
 
-    def parse_uri_for_feed_links(uri)
-      process_url(uri, true, true)
+    def parse_uri_for_feed_links(uri, options)
+      options[:parse_body_links] = true
+      process_url(uri, options)
     end
 
     def fetch_content_type_for_uri(uri, limit=10)
