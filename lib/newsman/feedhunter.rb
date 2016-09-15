@@ -194,7 +194,7 @@ module Newsman
       uris << URI.parse( "#{scheme}://#{host}/rssfeeds")
       uris << URI.parse( "#{scheme}://#{host}/blog")
       uris << URI.parse( "#{scheme}://feeds.#{remove_www(host)}")
-      uris << URI.parse( "#{scheme}://blog.{remove_www(host)}")
+      uris << URI.parse( "#{scheme}://blog.#{remove_www(host)}")
       uris.each do |uri|
         ct = get_uri_content_type(uri)
         puts "checking [#{uri}] got #{ct}"
