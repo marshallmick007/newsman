@@ -14,7 +14,9 @@ module Newsman
     DEFAULT_OPTIONS = {
       :strict_header_links => true,
       :search_wellknown_locations => true,
-      :parse_body_links => false
+      :parse_body_links => false,
+      :open_timeout => 10,
+      :read_timeout => 15
     }
 
     def find_feeds(url, options=DEFAULT_OPTIONS)
@@ -39,7 +41,12 @@ module Newsman
       fhash = {}
       options = DEFAULT_OPTIONS.merge(options)
       i = 0
-      page = Nokogiri::HTML( open( url, :allow_redirections => :safe ) );
+      read_opts = {
+        :allow_redirections => :safe,
+        :open_timeout => options[:open_timeout],
+        :read_timeout => options[:read_timeout]
+      }
+      page = Nokogiri::HTML( open( url, read_opts ) );
       page.css("link[rel='alternate']").each do |f|
         if f['type'] =~ RSS_CONTENT_TYPE || !options[:strict_header_links]
           title = f['title'] || "Unknown (#{i})"
