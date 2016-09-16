@@ -78,6 +78,8 @@ info.to_h
 
 ## Changelog
 
+0.5.6 - Limit body link parsing to 75
+
 0.5.5 - Support `:open_timeout` and `:read_timeout` for feed hunter
 
 0.5.3 - Support an options hash to `FeedHunter#find_feeds`. Additional

@@ -10,6 +10,7 @@ module Newsman
     FEEDBLITZ_BASE = /http?:\/\/feeds\.feedblitz\.com\/(.*)/
     RSS_CONTENT_TYPE = /application\/(rss|atom)\+xml/
     XML_CONTENT_TYPE = /text\/xml/
+    LINKS_TO_PARSE = 75
 
     DEFAULT_OPTIONS = {
       :strict_header_links => true,
@@ -74,7 +75,7 @@ module Newsman
       fhash = {}
 
       i = 0
-      page.css("a").each do |link|
+      page.css("a").first(LINKS_TO_PARSE).each do |link|
         url = link[:href]
         unless is_absolute_url?(url)
           url = "#{pageUrl}#{url}"
