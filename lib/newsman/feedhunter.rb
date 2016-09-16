@@ -43,7 +43,7 @@ module Newsman
       options = DEFAULT_OPTIONS.merge(options)
       i = 0
       read_opts = {
-        :allow_redirections => :safe,
+        :allow_redirections => :all,
         :open_timeout => options[:open_timeout],
         :read_timeout => options[:read_timeout]
       }
@@ -55,6 +55,8 @@ module Newsman
           fhash[location] = title
 
           i += 1 unless f['title']
+        else
+          #puts "skipping link[rel] -> #{f['href']}"
         end
       end
       wkfeeds = parse_wellknown_feed_providers(page, url)
@@ -252,6 +254,7 @@ module Newsman
         header = response['content-type']
       when Net::HTTPRedirection then
         location = response['location']
+        puts " [30x] -> #{location}"
         header = fetch_content_type_for_uri(URI.parse(location), limit - 1)
       else
         header = nil
@@ -266,7 +269,9 @@ module Newsman
     end
 
     def sanitize_url(baseUrl, href)
-      scheme = URI.parse(baseUrl).scheme
+      uri = baseUrl.respond_to?(:scheme) ? baseUrl : URI.parse(baseUrl)
+      href = href.to_s
+      scheme = uri.scheme
       if starts_with_feed_scheme? href
         href = href.sub(/(feed:\/\/)/, "#{scheme}://")
       end
