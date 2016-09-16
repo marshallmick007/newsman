@@ -10,7 +10,7 @@ module Newsman
     FEEDBLITZ_BASE = /http?:\/\/feeds\.feedblitz\.com\/(.*)/
     RSS_CONTENT_TYPE = /application\/(rss|atom)\+xml/
     XML_CONTENT_TYPE = /text\/xml/
-    LINKS_TO_PARSE = 500
+    LINKS_TO_PARSE = 150
     ACCEPT_HEADER = "applicaiton/rss+xml;application/rss+atom;text/xml"
 
     DEFAULT_OPTIONS = {
@@ -98,7 +98,7 @@ module Newsman
           title = "Body Link #{i}"
           uri = URI.parse(url)
           content_type = fetch_content_type_for_uri(uri)
-          puts "Following link #{uri}"
+          puts "Following link #{uri} [#{content_type}]"
           is_rss_ct = is_rss_content_type?( content_type )
           if is_rss_ct
             if uri.host
@@ -262,7 +262,7 @@ module Newsman
       http.read_timeout = timeout
 
       path = uri.path == '' ? '/' : uri.path
-      headers = { "Accept" => ACCEPT_HEADER }
+      headers = { 'Accept' => ACCEPT_HEADER }
       response = http.head(path, headers)
 
       case response
