@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.5.8 - Accept headers to fix sites like The Economist who wanted to
+send RSS.xml as `text/html`
+
 0.5.6 - Limit body link parsing to 75
 
 0.5.5 - Support `:open_timeout` and `:read_timeout` for feed hunter

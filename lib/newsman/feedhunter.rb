@@ -10,7 +10,8 @@ module Newsman
     FEEDBLITZ_BASE = /http?:\/\/feeds\.feedblitz\.com\/(.*)/
     RSS_CONTENT_TYPE = /application\/(rss|atom)\+xml/
     XML_CONTENT_TYPE = /text\/xml/
-    LINKS_TO_PARSE = 75
+    LINKS_TO_PARSE = 500
+    ACCEPT_HEADER = "applicaiton/rss+xml;application/rss+atom;text/xml"
 
     DEFAULT_OPTIONS = {
       :strict_header_links => true,
@@ -61,7 +62,7 @@ module Newsman
       end
       wkfeeds = parse_wellknown_feed_providers(page, url)
       fhash = wkfeeds.merge(fhash)
-      
+
       if options[:search_wellknown_locations]
         alt_feeds = try_alternate_feeds_for_uri(url) 
         fhash = alt_feeds.merge(fhash)
@@ -77,28 +78,42 @@ module Newsman
       fhash = {}
 
       i = 0
-      page.css("a").first(LINKS_TO_PARSE).each do |link|
-        url = link[:href]
-        unless is_absolute_url?(url)
-          url = "#{pageUrl}#{url}"
+      links = page.css("a").map do |l| 
+        link = { 
+          :href => l[:href], 
+          :title => l[:title] || l.content.strip 
+        }
+        if link[:title] && link[:title].length == 0
+          link[:title] = link[:href]
         end
-        title = "Body Link #{i}"
-        uri = URI.parse(url)
-        puts "Following link #{uri}"
-        is_rss_ct = is_rss_content_type?( fetch_content_type_for_uri(uri) )
-        if is_rss_ct
-          if uri.host
-            title = uri.host
+        link
+      end
+
+      links.uniq.first(LINKS_TO_PARSE).each do |link|
+        begin
+          url = link[:href]
+          unless is_absolute_url?(url)
+            url = URI.join(pageUrl, url).to_s
           end
-          if link[:title]
-            title = link[:title].strip
-          elsif link.content != nil && link.content.chomp.length > 0
-            title = link.content.chomp
+          title = "Body Link #{i}"
+          uri = URI.parse(url)
+          content_type = fetch_content_type_for_uri(uri)
+          puts "Following link #{uri}"
+          is_rss_ct = is_rss_content_type?( content_type )
+          if is_rss_ct
+            if uri.host
+              title = uri.host
+            end
+            if link[:title]
+              title = link[:title].strip
+            end
+            fhash[uri] = title.strip unless fhash[url]
+            i += 1
           end
-          fhash[uri] = title.strip unless fhash[url]
-          i += 1
+          #feeds << { :title => title, :url => url }
+        rescue StandardError => e
+          puts "Error parsing link #{link[:href]}"
         end
-        #feeds << { :title => title, :url => url }
       end
       fhash
     end
@@ -192,7 +207,7 @@ module Newsman
     def try_alternate_feeds_for_uri(uri, options=DEFAULT_OPTIONS)
       options = DEFAULT_OPTIONS.merge(options)
       options[:search_wellknown_locations] = false
-      
+
       fhash = {}
       uri = URI.parse(uri) unless uri.respond_to?(:host)
       host = uri.host
@@ -247,7 +262,8 @@ module Newsman
       http.read_timeout = timeout
 
       path = uri.path == '' ? '/' : uri.path
-      response = http.head(path)
+      headers = { "Accept" => ACCEPT_HEADER }
+      response = http.head(path, headers)
 
       case response
       when Net::HTTPSuccess then
