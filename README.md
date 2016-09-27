@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.6.0 - ATOM feeds can sometimes return `#content` properties instead of
+`#summary`
+
 0.5.8 - Accept headers to fix sites like The Economist who wanted to
 send RSS.xml as `text/html`
 

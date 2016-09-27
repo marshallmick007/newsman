@@ -165,7 +165,8 @@ module Newsman
     def get_item_content(entry, type)
       content=nil
       if type == :atom
-        content = entry.summary
+        content = entry.content if entry.respond_to?(:content)
+        content = entry.summary if content.nil?
       elsif entry.respond_to?(:content_encoded)
         content = entry.content_encoded
       else
