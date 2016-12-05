@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.6.2 - Added option :advanced_search_mode to feedhunter. Setting to
+:simple will skip parsing and following of body links
+
 0.6.0 - ATOM feeds can sometimes return `#content` properties instead of
 `#summary`
 

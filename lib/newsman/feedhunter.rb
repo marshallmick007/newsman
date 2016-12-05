@@ -16,6 +16,7 @@ module Newsman
     DEFAULT_OPTIONS = {
       :strict_header_links => true,
       :search_wellknown_locations => true,
+      :advanced_search_mode => :default,
       :parse_body_links => false,
       :open_timeout => 10,
       :read_timeout => 15
@@ -64,7 +65,7 @@ module Newsman
       fhash = wkfeeds.merge(fhash)
 
       if options[:search_wellknown_locations]
-        alt_feeds = try_alternate_feeds_for_uri(url) 
+        alt_feeds = try_alternate_feeds_for_uri(url, options)
         fhash = alt_feeds.merge(fhash)
       end
       if options[:parse_body_links]
@@ -225,7 +226,7 @@ module Newsman
         puts "checking [#{uri}] got #{ct}"
         if ct == :feed
           fhash[uri] = "#{uri}"
-        elsif ct == :html
+        elsif ct == :html && options[:advanced_search_mode] != :simple
           # This might be an index file, so scan the html for links
           # that also could be feed links
           begin
