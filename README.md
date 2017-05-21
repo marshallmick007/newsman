@@ -78,10 +78,13 @@ info.to_h
 
 ## Changelog
 
+0.7.1 - Added `:output_file` options to FeedParser. Passing a file name
+will write the contents of the feed to that file
+
 0.7.0 - Renamed `RssPost` to `Post`, `RssInfo` to `Feed`
 
-0.6.2 - Added option :advanced_search_mode to feedhunter. Setting to
-:simple will skip parsing and following of body links
+0.6.2 - Added option `:advanced_search_mode` to feedhunter. Setting to
+`:simple` will skip parsing and following of body links
 
 0.6.0 - ATOM feeds can sometimes return `#content` properties instead of
 `#summary`

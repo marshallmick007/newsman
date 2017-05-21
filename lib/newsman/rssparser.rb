@@ -26,12 +26,14 @@ module Newsman
 
     def fetch(url, options=DEFAULT_OPTIONS)
       info = Feed.new url
+      write_error = nil
       size = 0
       begin
         opts = DEFAULT_OPTIONS.merge(options)
         open_opts = DEFAULT_READ_OPTS.merge(opts[:read_options])
         open(url, open_opts) do |f|
           raw = f.read
+          info.write_status = write_raw_feed(raw, opts)
           size = try_get_size(f)
           info.rss = RSS::Parser.parse(raw, false)
         end
@@ -41,7 +43,8 @@ module Newsman
         info.error = "While fetching #{url}: #{e} (#{e.class})"
       end
 
-      build_feed( info, size, opts )
+      info = build_feed( info, size, opts )
+      
     end
 
     def try_get_size(file)
@@ -266,6 +269,21 @@ module Newsman
         return :atom
       end
       return :unknown
+    end
+
+    def write_raw_feed(contents, opts)
+      status = { :length => 0, :error => nil, :file => nil }
+      if opts[:output_file]
+        begin
+          status[:length] = File.write(opts[:output_file], contents)
+          status[:file] = opts[:output_file]
+        rescue IOError => e
+          status[:error] = e.message
+        rescue StandardError => se
+          status[:error] = se.message
+        end
+      end
+      status
     end
   end
 end

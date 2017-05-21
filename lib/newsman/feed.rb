@@ -4,7 +4,8 @@ module Newsman
     attr_accessor :url, :title, :item_count, :feed_type,
                   :raw, :rss, :fetched, :error,
                   :published_date, :post_frequency,
-                  :items, :post_frequency_stats
+                  :items, :post_frequency_stats,
+                  :write_status
 
     alias :stats :post_frequency_stats
 
@@ -13,7 +14,23 @@ module Newsman
     end
 
     def has_error?
-      @error.nil? == false
+      !success?
+    end
+
+    def success?
+      @error.nil?
+    end
+
+    def rss?
+      @feed_type == :rss
+    end
+
+    def file_cached?
+      @write_status.nil? == false && @write_status[:length] > 0
+    end
+    
+    def atom?
+      @feed_type == :atom
     end
 
     def to_h
