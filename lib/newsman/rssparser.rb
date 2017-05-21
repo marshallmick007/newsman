@@ -25,7 +25,7 @@ module Newsman
     end
 
     def fetch(url, options=DEFAULT_OPTIONS)
-      info = RssInfo.new url
+      info = Feed.new url
       size = 0
       begin
         opts = DEFAULT_OPTIONS.merge(options)
@@ -41,7 +41,7 @@ module Newsman
         info.error = "While fetching #{url}: #{e} (#{e.class})"
       end
 
-      build_rss( info, size, opts )
+      build_feed( info, size, opts )
     end
 
     def try_get_size(file)
@@ -57,7 +57,7 @@ module Newsman
       size
     end
 
-    def build_rss( info, size, options )
+    def build_feed( info, size, options )
       return info if info.has_error?
 
       info.feed_type = feed_type( info.rss )
@@ -104,7 +104,7 @@ module Newsman
       hasNilDates = false
       items.each do |i|
       #items_sorted( items, type ).each do |i|
-        post = RssPost.new
+        post = Newsman::Post.new
         post.published_date = get_post_date(i, type)
         if post.published_date.nil? && hasNilDates == false
           hasNilDates = true
@@ -159,7 +159,7 @@ module Newsman
       unless date.utc?
         date = date.getutc
       end
-      return date
+      date
     end
 
     def get_item_content(entry, type)
@@ -174,7 +174,7 @@ module Newsman
       else
         content = entry.description
       end
-      return sanitize(content)
+      sanitize(content)
     end
 
     def sanitize(content)
@@ -190,7 +190,7 @@ module Newsman
       else
         title = entry.title
       end
-      return Sanitize.clean(title, Sanitize::Config::BASIC)
+      Sanitize.clean(title, Sanitize::Config::BASIC)
     end
 
     def get_item_url(entry, type)
@@ -269,5 +269,3 @@ module Newsman
     end
   end
 end
-
-

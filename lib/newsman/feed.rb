@@ -1,6 +1,6 @@
 
 module Newsman
-  class RssInfo
+  class Feed
     attr_accessor :url, :title, :item_count, :feed_type,
                   :raw, :rss, :fetched, :error,
                   :published_date, :post_frequency,
