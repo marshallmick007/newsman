@@ -78,6 +78,8 @@ info.to_h
 
 ## Changelog
 
+0.7.0 - Renamed `RssPost` to `Post`, `RssInfo` to `Feed`
+
 0.6.2 - Added option :advanced_search_mode to feedhunter. Setting to
 :simple will skip parsing and following of body links
 

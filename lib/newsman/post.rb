@@ -1,5 +1,5 @@
 module Newsman
-  class RssPost
+  class Post
     attr_accessor :url, :title, :published_date, :error, :content, :links
 
     def initialize(url=nil)

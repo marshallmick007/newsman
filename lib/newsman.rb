@@ -1,6 +1,6 @@
 require "newsman/version"
-require "newsman/rssinfo"
-require "newsman/rsspost"
+require "newsman/feed"
+require "newsman/post"
 require "newsman/rssparser"
 require "newsman/feedhunter"
 require "newsman/url_normalizer"
