@@ -1,8 +1,10 @@
 require "newsman/version"
 require "newsman/feed"
 require "newsman/post"
+require "newsman/website"
 require "newsman/rssparser"
 require "newsman/feedhunter"
+require "newsman/siteinformation"
 require "newsman/url_normalizer"
 
 module Newsman

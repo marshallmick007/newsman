@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.7.2 - Added `Newsman::SiteInformation`, which fetches feeds and site
+icons, as well as site title information
+
 0.7.1 - Added `:output_file` options to FeedParser. Passing a file name
 will write the contents of the feed to that file
 

@@ -26,7 +26,8 @@ module Newsman
       fhash = {}
       feeds = {}
       begin
-        fhash = process_url(url, options)
+        page = open_url(url, options)
+        fhash = process_feeds_for_url(url, page, options)
         fhash.each do |k, v|
           feeds[v] = k
         end
@@ -40,16 +41,11 @@ module Newsman
       return normalize_feeds(feeds)
     end
 
-    def process_url(url, options)
+
+    def process_feeds_for_url(url, page, options)
       fhash = {}
       options = DEFAULT_OPTIONS.merge(options)
       i = 0
-      read_opts = {
-        :allow_redirections => :all,
-        :open_timeout => options[:open_timeout],
-        :read_timeout => options[:read_timeout]
-      }
-      page = Nokogiri::HTML( open( url, read_opts ) );
       page.css("link[rel='alternate']").each do |f|
         if f['type'] =~ RSS_CONTENT_TYPE || !options[:strict_header_links]
           title = f['title'] || "Unknown (#{i})"
@@ -74,6 +70,8 @@ module Newsman
       end
       return fhash
     end
+
+    private
 
     def parse_body_links(page, pageUrl)
       fhash = {}
@@ -321,6 +319,17 @@ module Newsman
 
     alias_method :find, :find_feeds
 
+    def open_url(url, options)
+      options = DEFAULT_OPTIONS.merge(options)
+      i = 0
+      read_opts = {
+        :allow_redirections => :all,
+        :open_timeout => options[:open_timeout],
+        :read_timeout => options[:read_timeout]
+      }
+      # https://stackoverflow.com/questions/2572396/nokogiri-open-uri-and-unicode-charactershttps://stackoverflow.com/questions/2572396/nokogiri-open-uri-and-unicode-characters
+      page = Nokogiri::HTML( open( url, read_opts ).read, nil, 'utf-8' );
+      page
+    end
   end
 end
-
