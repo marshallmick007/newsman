@@ -66,14 +66,15 @@ module Newsman
       info.feed_type = feed_type( info.rss )
       if info.rss.nil? || info.rss.items.nil?
         info.error = "Null Items found. Not an RSS feed?"
+        info.items = []
       else
         info.item_count = info.rss.items.length
         info.title = get_title( info.rss, info.feed_type )
         info.published_date = get_pubdate( info.rss, info.feed_type )
         info.items = get_items( info.rss.items, info.feed_type, options )
         #info.post_frequency = get_post_frequency(info.items)
-        set_post_frequency(info)
       end
+      set_post_frequency(info)
       info.stats[:size] = size
       info.fetched = true
 
