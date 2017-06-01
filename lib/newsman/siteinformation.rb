@@ -12,7 +12,8 @@ module Newsman
       :parse_body_links => false,
       :open_timeout => 10,
       :read_timeout => 15,
-      :find_site_icons => true
+      :find_site_icons => true,
+      :find_feeds => true
     }
 
     SITE_IMAGE_LINK_RELS = %w{apple-touch-icon fluid-icon
@@ -24,14 +25,34 @@ module Newsman
       @feedhunter = Newsman::FeedHunter.new
     end
 
+    def get_with_feeds(url, options=DEFAULT_OPTIONS)
+      opts = { :find_feeds => true, :find_site_icons => false }
+      opts = options.merge(opts)
+      get(url, opts)
+    end
+    
+    def get_with_icons(url, options=DEFAULT_OPTIONS)
+      opts = { :find_feeds => false, :find_site_icons => true }
+      opts = options.merge(opts)
+      get(url, opts)
+    end
+
+    def get_with_feeds_and_icons(url, options=DEFAULT_OPTIONS)
+      opts = { :find_feeds => true, :find_site_icons => true }
+      opts = options.merge(opts)
+      get(url, opts)
+    end
+
     def get(url, options=DEFAULT_OPTIONS)
       options = DEFAULT_OPTIONS.merge(options)
       w = Newsman::Website.new(url)
       begin
         page = open_url(url, options)
         w.set_title(page.title)
-        feeds_hash = @feedhunter.process_feeds_for_url(url, page, options)
-        w.set_feeds(feeds_hash)
+        if options[:find_feeds]
+          feeds_hash = @feedhunter.process_feeds_for_url(url, page, options)
+          w.set_feeds(feeds_hash)
+        end
         if options[:find_site_icons]
           icons = find_site_icons(page, url)
           w.set_icons(icons)
