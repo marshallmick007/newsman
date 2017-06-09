@@ -78,6 +78,8 @@ info.to_h
 
 ## Changelog
 
+0.7.5 - Removing any non-UTF8 Characters from SiteInfo title
+
 0.7.2 - Added `Newsman::SiteInformation`, which fetches feeds and site
 icons, as well as site title information
 

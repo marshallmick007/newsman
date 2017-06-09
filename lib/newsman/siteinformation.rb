@@ -48,7 +48,7 @@ module Newsman
       w = Newsman::Website.new(url)
       begin
         page = open_url(url, options)
-        w.set_title(page.title)
+        w.set_title( strip_non_utf8_chars( page.title ) )
         if options[:find_feeds]
           feeds_hash = @feedhunter.process_feeds_for_url(url, page, options)
           w.set_feeds(feeds_hash)
@@ -66,6 +66,11 @@ module Newsman
     end
 
     private
+
+    def strip_non_utf8_chars(str)
+      return nil unless str
+      str.encode('UTF-8', :invalid => :replace, :undef => :replace)
+    end
 
     def find_site_icons(page, url)
       icons = []
