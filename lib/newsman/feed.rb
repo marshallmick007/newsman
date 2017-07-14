@@ -21,6 +21,8 @@ module Newsman
       @error.nil?
     end
 
+    alias :ok? :success?
+
     def rss?
       @feed_type == :rss
     end

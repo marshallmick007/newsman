@@ -4,6 +4,7 @@ require 'open_uri_redirections'
 require 'sanitize'
 
 module Newsman
+
   class RssParser
     SECONDS_IN_HOUR = 60 * 60
     SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR
@@ -17,10 +18,11 @@ module Newsman
     DEFAULT_OPTIONS = {
       :include_content => false,
       :parse_links => false,
-      :read_options => DEFAULT_READ_OPTS
+      :read_options => DEFAULT_READ_OPTS,
+      :output_file => nil
     }
 
-    def initialize()
+    def initialize
       @url_normalizer = Newsman::UrlNormalizer.new
     end
 
@@ -31,7 +33,7 @@ module Newsman
       begin
         opts = DEFAULT_OPTIONS.merge(options)
         open_opts = DEFAULT_READ_OPTS.merge(opts[:read_options])
-        open(url, open_opts) do |f|
+        open_requested_location(url, open_opts) do |f|
           raw = f.read
           info.write_status = write_raw_feed(raw, opts)
           size = try_get_size(f)
@@ -44,7 +46,32 @@ module Newsman
       end
 
       info = build_feed( info, size, opts )
-      
+    end
+    
+    def self.fetch(url, options=DEFAULT_OPTIONS)
+      RssParser.new.fetch(url, options)
+    end
+
+    def self.load(url, options=DEFAULT_OPTIONS)
+      fetch(url,options)
+    end
+
+    private
+
+    def open_requested_location(location, opts)
+      if is_url?(location)
+        open(location, opts) do |f|
+          yield f
+        end
+      else
+        open(location) do |f|
+          yield f
+        end
+      end
+    end
+
+    def is_url?(location)
+      location.start_with?('http:', 'https:', 'feed:')
     end
 
     def try_get_size(file)
@@ -287,4 +314,6 @@ module Newsman
       status
     end
   end
+  
+  class FeedParser < RssParser; end
 end

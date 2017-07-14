@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.7.6 - supports loading feeds from disk, and added static convienence
+methods to `Newsman::FeedParser`
+
 0.7.5 - Removing any non-UTF8 Characters from SiteInfo title
 
 0.7.2 - Added `Newsman::SiteInformation`, which fetches feeds and site
