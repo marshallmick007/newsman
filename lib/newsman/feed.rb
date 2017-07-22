@@ -2,15 +2,17 @@
 module Newsman
   class Feed
     attr_accessor :url, :title, :item_count, :feed_type,
-                  :raw, :rss, :fetched, :error,
+                  :fetched, :error,
                   :published_date, :post_frequency,
                   :items, :post_frequency_stats,
-                  :write_status
+                  :write_status,
+                  :most_recent_entry
 
     alias :stats :post_frequency_stats
 
     def initialize(url=nil)
       @url = url
+      @rss = nil
     end
 
     def has_error?
@@ -27,12 +29,30 @@ module Newsman
       @feed_type == :rss
     end
 
+    def atom?
+      @feed_type == :atom
+    end
+
+    def set_raw_feed(raw)
+      @rss = raw
+    end
+
+    def raw_feed
+      @rss
+    end
+
+    alias :rss :raw_feed
+
     def file_cached?
       @write_status.nil? == false && @write_status[:length] > 0
     end
     
     def atom?
       @feed_type == :atom
+    end
+
+    def inspect
+      "#<#{self.class.name}:#{"0x00%x" % (object_id << 1)} #{self.to_h}>"
     end
 
     def to_h
@@ -45,7 +65,8 @@ module Newsman
         :error => @error,
         :post_frequency => @post_frequency,
         :post_frequency_stats => @post_frequency_stats,
-        :items => @items
+        :items => @items,
+        :most_recent_entry => @most_recent_entry
       }
     end
   end

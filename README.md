@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.7.7 - Computes most recent entry on Feed in the `most_recent_entry`
+property
+
 0.7.6 - supports loading feeds from disk, and added static convienence
 methods to `Newsman::FeedParser`
 

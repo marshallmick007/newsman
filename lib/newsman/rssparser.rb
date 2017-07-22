@@ -2,6 +2,7 @@ require 'rss'
 require 'open-uri'
 require 'open_uri_redirections'
 require 'sanitize'
+require_relative './result'
 
 module Newsman
 
@@ -37,7 +38,7 @@ module Newsman
           raw = f.read
           info.write_status = write_raw_feed(raw, opts)
           size = try_get_size(f)
-          info.rss = RSS::Parser.parse(raw, false)
+          info.set_raw_feed RSS::Parser.parse(raw, false)
         end
       rescue OpenURI::HTTPError => he
         info.error = he.message
@@ -56,8 +57,19 @@ module Newsman
       fetch(url,options)
     end
 
+    def self.parse(url, options=DEFAULT_OPTIONS)
+      fetch(url,options)
+    end
+
     private
 
+    #
+    # Delegates opening of a loccation to either
+    # open-uri for URLs or a File otherwse
+    #
+    # @location is a string (either a url or a file path)
+    # @opts is a Newsman options hash
+    #
     def open_requested_location(location, opts)
       if is_url?(location)
         open(location, opts) do |f|
@@ -70,23 +82,34 @@ module Newsman
       end
     end
 
+    #
+    # Computes if a location looks like a URL
+    #
     def is_url?(location)
       location.start_with?('http:', 'https:', 'feed:')
     end
 
+    #
+    # Tries to compute a size of the raw RSS content
+    #
     def try_get_size(file)
-      size = 0
-      begin
+      result = GitHub::Result.new do
         if file.meta && file.meta["content-length"]
           size = file.meta["content-length"].to_i
         else
           size = File.size(file)
         end
-      rescue StandardError => e
       end
-      size
+      result.value { 0 }
     end
 
+    #
+    # Builds a Newsman::Feed object from a raw Ruby RSS object
+    # 
+    # @info is a Newsman::Feed option
+    # @size is the computed content size
+    # @options is a Newsman options array
+    #
     def build_feed( info, size, options )
       return info if info.has_error?
 
@@ -100,6 +123,7 @@ module Newsman
         info.published_date = get_pubdate( info.rss, info.feed_type )
         info.items = get_items( info.rss.items, info.feed_type, options )
         #info.post_frequency = get_post_frequency(info.items)
+        info.most_recent_entry = get_most_recent_entry_date(info.items)
       end
       set_post_frequency(info)
       info.stats[:size] = size
@@ -108,6 +132,25 @@ module Newsman
       return info
     end
 
+    #
+    # Finds the most recent entry given a pre-sorted list of Newsman::Post
+    # 
+    # @items is Newsman::Post array
+    #
+    def get_most_recent_entry_date(items)
+      begin
+        return items[0].published_date if items && items[0]
+      rescue
+        nil
+      end
+    end
+
+    #
+    # Normalizes Title for a feed
+    #
+    # @data is a raw ruby RSS object
+    # @type is newsman computed symbol
+    #
     def get_title(data, type)
       if type == :rss
         return data.channel.title
@@ -116,7 +159,13 @@ module Newsman
       end
       nil
     end
-
+    
+    #
+    # Normalizes feed publication date for a feed
+    #
+    # @data is a raw ruby RSS object
+    # @type is newsman computed symbol
+    #
     def get_pubdate(data, type)
       if type == :rss
         return data.channel.lastBuildDate
@@ -125,11 +174,24 @@ module Newsman
       end
       nil
     end
-
+    
+    #
+    # Sorts raw RSS entries by post date
+    #
+    # @items is a raw ruby RSS object's items collection
+    # @type is newsman computed symbol
+    #
     def items_sorted(items, type)
       items.sort { |a,b| get_post_date(b, type) <=> get_post_date(a, type) }
     end
 
+    #
+    # Computes Newsman::Post array for a feed
+    #
+    # @items is a raw ruby RSS object's items collection
+    # @type is newsman computed symbol
+    # @options are FeedParser options hash
+    #
     def get_items(items, type, options)
       posts = []
       hasNilDates = false
@@ -156,20 +218,23 @@ module Newsman
       return posts
     end
 
+
     def get_normalized_links(content)
       return [] if content.nil?
       URI.extract(content).map { |u| @url_normalizer.normalize(u) }.compact
     end
 
+    #
+    # Normalizes the Post Date for a feed entry
+    #
+    # @entry is a raw ruby RSS entry object
+    # @type is newsman computed symbol
+    #
     def get_post_date(entry, type)
       date = Time.now.utc
       if type == :atom
         if entry.updated
           date = entry.updated.content
-        #elsif entry.modified
-        #  date = entry.modified.content
-        #elsif entry.issued
-        #  date = entry.issued.content
         else
           date = nil
         end
@@ -193,6 +258,12 @@ module Newsman
       date
     end
 
+    #
+    # Gets the content of a feed entry
+    #
+    # @entry is a raw ruby RSS entry object
+    # @type is newsman computed symbol
+    #
     def get_item_content(entry, type)
       content=nil
       if type == :atom
@@ -214,6 +285,12 @@ module Newsman
       end
     end
 
+    #
+    # Normalizes Title for a raw RSS entry
+    #
+    # @entry is a raw ruby RSS entry object
+    # @type is newsman computed symbol
+    #
     def get_item_title(entry, type)
       title = ""
       if type == :atom
@@ -224,6 +301,12 @@ module Newsman
       Sanitize.clean(title, Sanitize::Config::BASIC)
     end
 
+    #
+    # Normalizes the entry URL a raw RSS entry
+    #
+    # @entry is a raw ruby RSS entry object
+    # @type is newsman computed symbol
+    #
     def get_item_url(entry, type)
       if type == :atom
         return entry.link.href
@@ -232,6 +315,13 @@ module Newsman
       end
     end
 
+    #
+    # Computes the timeframe from the newest and oldest entry for
+    # a Newsman::Feed items collection
+    # @items is Newsman::Post array
+    #
+    # @returns 'Inf' if unable to compute a timespan
+    #
     def get_item_span_in_seconds(items)
       return "Inf" if items[0].published_date.nil? && items[-1].published_date.nil?
       # TODO: Hacker News has no dates, so handle this better
@@ -243,11 +333,21 @@ module Newsman
       end
     end
 
-    def set_post_frequency(entry)
-      entry.post_frequency_stats = get_post_frequency(entry.items)
-      entry.post_frequency = entry.post_frequency_stats[:label]
+    #
+    # Computes the post frequency hash for a Newsman::Feed
+    #
+    # @feed is a Newsman::Feed
+    #
+    def set_post_frequency(feed)
+      feed.post_frequency_stats = get_post_frequency(feed.items)
+      feed.post_frequency = feed.post_frequency_stats[:label]
     end
 
+    #
+    # Computes the post frequency hash for a Newsman::Feed items array
+    #
+    # @items is a Newsman::Post array
+    #
     def get_post_frequency(items)
       measure = 0
       stats = {
@@ -290,6 +390,13 @@ module Newsman
       return stats
     end
 
+    #
+    # Computes the Newsman type symbol
+    #
+    # @data is a raw RSS object
+    #
+    # @returns :rss, :atom, :unknown
+    #
     def feed_type(data)
       if( data.is_a? RSS::Rss )
         return :rss
@@ -299,6 +406,16 @@ module Newsman
       return :unknown
     end
 
+    #
+    # Write a raw RSS feed to an output file
+    # 
+    # @contents is the raw string contents for a feed
+    # @opts is the Newsman options hash. 
+    #
+    # This method only is invoked if opts[:output_file] is specified
+    #
+    # @returns a status hash
+    #
     def write_raw_feed(contents, opts)
       status = { :length => 0, :error => nil, :file => nil }
       if opts[:output_file]
@@ -315,5 +432,6 @@ module Newsman
     end
   end
   
+  # Rename class to a more friendly name
   class FeedParser < RssParser; end
 end

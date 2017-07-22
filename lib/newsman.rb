@@ -1,4 +1,5 @@
 require "newsman/version"
+require "newsman/result"
 require "newsman/feed"
 require "newsman/post"
 require "newsman/website"
