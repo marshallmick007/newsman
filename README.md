@@ -78,6 +78,9 @@ info.to_h
 
 ## Changelog
 
+0.7.9 - New `Newsman::FeedParser` fetch option `:keep_source_order`
+which prevents Newsman from attempting to sort a feeds posts by date.
+
 0.7.7 - Computes most recent entry on Feed in the `most_recent_entry`
 property
 

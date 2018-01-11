@@ -21,6 +21,7 @@ module Newsman
       :parse_links => false,
       :read_options => DEFAULT_READ_OPTS,
       :output_file => nil
+      :keep_source_order => false
     }
 
     def initialize
@@ -194,7 +195,7 @@ module Newsman
     #
     def get_items(items, type, options)
       posts = []
-      hasNilDates = false
+      hasNilDates = options[:keep_source_order] || false
       items.each do |i|
       #items_sorted( items, type ).each do |i|
         post = Newsman::Post.new
