@@ -20,7 +20,7 @@ module Newsman
       :include_content => false,
       :parse_links => false,
       :read_options => DEFAULT_READ_OPTS,
-      :output_file => nil
+      :output_file => nil,
       :keep_source_order => false
     }
 
