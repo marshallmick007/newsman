@@ -78,6 +78,8 @@ info.to_h
 
 ## Changelog
 
+0.8.0 - Adds `comments_url` to `Newsman::Post`
+
 0.7.9 - New `Newsman::FeedParser` fetch option `:keep_source_order`
 which prevents Newsman from attempting to sort a feeds posts by date.
 

@@ -205,6 +205,13 @@ module Newsman
         end
         post.title = get_item_title(i, type)
         post.url = get_item_url(i, type)
+        # find comments url
+        if i.respond_to? :comments
+          post.comments_url = i.comments
+        elsif i.respond_to? :link
+          post.comments_url = i.link.href
+        end
+        
         if options[:include_content]
           post.content = get_item_content(i, type)
         end
