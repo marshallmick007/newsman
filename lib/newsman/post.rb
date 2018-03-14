@@ -1,6 +1,8 @@
 module Newsman
   class Post
-    attr_accessor :url, :title, :published_date, :error, :content, :links, :comments_url
+    attr_accessor :url, :title, :published_date, 
+                  :error, :content, :links, 
+                  :comments_url, :canonical_id
 
     def initialize(url=nil)
       @url = url
@@ -13,6 +15,7 @@ module Newsman
 
     def to_h
       {
+        :canonical_id => @canonical_id,
         :url => @url,
         :title => @title,
         :published_date => @published_date,

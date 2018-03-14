@@ -218,6 +218,9 @@ module Newsman
         if options[:parse_links]
           post.links = get_normalized_links(get_item_content(i, type))
         end
+        
+        post.canonical_id = compute_canonical_id(i, type, post)
+
         posts << post
       end
 
@@ -285,6 +288,46 @@ module Newsman
         content = entry.description
       end
       sanitize(content)
+    end
+
+
+    #
+    # Computes a canonical id for the given entry
+    #
+    # @entry is a raw ruby RSS entry object
+    # @type is newsman computed symbol
+    # @post is a Newsman::Post object
+    #
+    def compute_canonical_id(entry, type, post)
+      id = nil
+      if type == :atom
+        if entry.id
+          id = entry.id.content if entry.id.respond_to?(:content)
+        end
+      else
+        id = entry.guid.content if entry.respond_to?(:guid) && entry.guid
+      end
+
+      # No unique id published by the feed
+      # Try to use the post url or a hash of the post title
+      id = nil if id.strip == ''
+      if id.nil?
+        if post.url && post.url.strip != ''
+          id = post.url
+        elsif post.title && post.title.strip != ''
+          id = post.title
+        end
+      end
+
+      # Last-ditch effort...
+      id = nil if id.strip == ''
+      if id.nil?
+
+         # TODO: what do we do as a last ditch?
+
+      end
+
+      id
     end
 
     def sanitize(content)
