@@ -315,7 +315,10 @@ module Newsman
 
       # No unique id published by the feed
       # Try to use the post url or a hash of the post title
-      id = nil if id.strip == ''
+      unless id.nil?
+        id = nil if id.strip == ''
+      end
+
       if id.nil?
         if post.url && post.url.strip != ''
           id = post.url
@@ -325,7 +328,9 @@ module Newsman
       end
 
       # Last-ditch effort...
-      id = nil if id.strip == ''
+      unless id.nil?
+        id = nil if id.strip == ''
+      end
       if id.nil?
 
          # TODO: what do we do as a last ditch?
