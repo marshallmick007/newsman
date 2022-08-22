@@ -41,6 +41,14 @@ module Newsman
       @rss
     end
 
+    def set_raw_string(raw)
+      @rawstring = raw
+    end
+
+    def raw_string
+      @rawstring
+    end
+
     alias :rss :raw_feed
 
     def file_cached?

@@ -2,7 +2,8 @@ module Newsman
   class Post
     attr_accessor :url, :title, :published_date, 
                   :error, :content, :links, 
-                  :comments_url, :canonical_id
+                  :comments_url, :canonical_id,
+                  :raw
 
     def initialize(url=nil)
       @url = url

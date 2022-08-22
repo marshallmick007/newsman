@@ -22,6 +22,7 @@ module Newsman
       :read_options => DEFAULT_READ_OPTS,
       :output_file => nil,
       :keep_source_order => false
+      #:include_media => false
     }
 
     def initialize
@@ -39,6 +40,8 @@ module Newsman
           raw = f.read
           info.write_status = write_raw_feed(raw, opts)
           size = try_get_size(f)
+          info.set_raw_string(raw)
+          
           info.set_raw_feed RSS::Parser.parse(raw, false)
         end
       rescue OpenURI::HTTPError => he
@@ -197,8 +200,8 @@ module Newsman
       posts = []
       hasNilDates = options[:keep_source_order] || false
       items.each do |i|
-      #items_sorted( items, type ).each do |i|
         post = Newsman::Post.new
+        post.raw = i
         post.published_date = get_post_date(i, type)
         if post.published_date.nil? && hasNilDates == false
           hasNilDates = true
@@ -244,7 +247,9 @@ module Newsman
     def get_post_date(entry, type)
       date = Time.now.utc
       if type == :atom
-        if entry.updated
+        if entry.published
+          date = entry.published.content
+        elsif entry.updated
           date = entry.updated.content
         else
           date = nil
